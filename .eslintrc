@@ -1,8 +1,18 @@
 {
+  "env": {
+    "browser": true,
+    "commonjs": true,
+    "es2021": true
+  },
   "extends": "airbnb-base",
-  "rules":{
+  "overrides": [],
+  "parserOptions": {
+    "ecmaVersion": "latest"
+  },
+  "rules": {
     "no-underscore-dangle": [
-      "error", {
+      "error",
+      {
         "allow": [
           "_id"
         ]

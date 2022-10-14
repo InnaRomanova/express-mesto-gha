@@ -1,7 +1,8 @@
 const express = require('express');
-// Слушаем 3000 порт
-const { PORT = 3000 } = process.env;
+
 const mongoose = require('mongoose');
+
+const { PORT = 3000 } = process.env; // Слушаем 3000 порт
 
 const app = express();
 app.use(express.json());
