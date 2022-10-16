@@ -2,7 +2,7 @@ const Card = require('../models/card');
 
 const SUCCESS_CODE = 200;
 const ERROR_CODE = 400;
-// const NOT_FOUND_CODE = 404;
+const NOT_FOUND_CODE = 404;
 const SERVER_CODE = 500;
 
 module.exports.getCards = (req, res) => {
@@ -28,12 +28,29 @@ module.exports.deleteCard = (req, res) => {
     .catch(() => res.send({ error: 'Карточка id не найден' }));
 };
 
-module.exports.likeCard = (req) => Card.findByIdAndUpdate(
-  req.params.cardId,
-  { $addToSet: { likes: req.user._id } },
-  // добавить _id в массив, если его там нет
-  { new: true },
-);
+module.exports.likeCard = (req, res) => {
+  Card.findById(req.params.cardId)
+    .then((card) => {
+      if (!card) {
+        res.status(NOT_FOUND_CODE).send({ message: 'Пост с таким id не найден' });
+        return;
+      }
+      Card.findByIdAndUpdate(
+        req.params.cardId,
+        { $addToSet: { likes: req.user._id } },
+        { new: true },
+      )
+        .then((newCard) => res.send(newCard))
+        .catch((err) => res.status(SERVER_CODE).send(err));
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(ERROR_CODE).send(err);
+        return;
+      }
+      res.status(SERVER_CODE).send(err);
+    });
+};
 
 module.exports.dislikeCard = (req) => Card.findByIdAndUpdate(
   req.params.cardId,
