@@ -23,9 +23,23 @@ module.exports.createCard = (req, res) => {
 };
 
 module.exports.deleteCard = (req, res) => {
-  Card.deleteOne({ _id: req.params.id })
-    .then(() => res.send({ succsess: 'Карточка удалена' }))
-    .catch(() => res.send({ error: 'Карточка id не найден' }));
+  Card.findById(req.params.cardId)
+    .then((card) => {
+      if (!card) {
+        res.status(ERROR_CODE).send({ message: 'Пост с таким id не найден' });
+        return;
+      }
+      Card.findByIdAndRemove(req.params.cardId)
+        .then(() => res.send({ message: 'Пост удалён' }))
+        .catch((err) => res.status(SERVER_CODE).send(err));
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(ERROR_CODE).send(err);
+        return;
+      }
+      res.status(SERVER_CODE).send(err);
+    });
 };
 
 module.exports.likeCard = (req, res) => {
