@@ -1,8 +1,8 @@
 const Card = require('../models/card');
 
 const SUCCSESS_CODE = 200;
-const ERROR_CODE = 400;
-const NOT_FOUND_CODE = 404;
+// const ERROR_CODE = 400;
+// const NOT_FOUND_CODE = 404;
 const SERVER_CODE = 500;
 
 module.exports.getCards = (req, res) => {
@@ -23,14 +23,14 @@ module.exports.deleteCard = (req, res) => {
     .catch(() => res.send({ error: 'Карточка id не найден' }));
 };
 
-module.exports.likeCard = (req, res) => Card.findByIdAndUpdate(
+module.exports.likeCard = (req) => Card.findByIdAndUpdate(
   req.params.cardId,
   { $addToSet: { likes: req.user._id } },
   // добавить _id в массив, если его там нет
   { new: true },
 );
 
-module.exports.dislikeCard = (req, res) => Card.findByIdAndUpdate(
+module.exports.dislikeCard = (req) => Card.findByIdAndUpdate(
   req.params.cardId,
   { $pull: { likes: req.user._id } }, // убрать _id из массива
   { new: true },
