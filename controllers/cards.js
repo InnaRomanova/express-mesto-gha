@@ -12,7 +12,7 @@ module.exports.getCards = (req, res) => {
 module.exports.createCard = (req, res) => {
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user._id })
-    .then(() => res.status(SUCCESS_CODE).send({ message: 'Пользователь создан' }))
+    .then((card) => res.status(SUCCESS_CODE).send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(ERROR_CODE).send(err);
