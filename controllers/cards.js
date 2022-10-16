@@ -52,8 +52,26 @@ module.exports.likeCard = (req, res) => {
     });
 };
 
-module.exports.dislikeCard = (req) => Card.findByIdAndUpdate(
-  req.params.cardId,
-  { $pull: { likes: req.user._id } }, // убрать _id из массива
-  { new: true },
-);
+module.exports.dislikeCard = (req, res) => {
+  Card.findById(req.params.cardId)
+    .then((card) => {
+      if (!card) {
+        res.status(NOT_FOUND_CODE).send({ message: 'Пост с таким id не найден' });
+        return;
+      }
+      Card.findByIdAndUpdate(
+        req.params.cardId,
+        { $pull: { likes: req.user._id } },
+        { new: true },
+      )
+        .then((newCard) => res.send(newCard))
+        .catch((err) => res.status(SERVER_CODE).send(err));
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(ERROR_CODE).send(err);
+        return;
+      }
+      res.status(SERVER_CODE).send(err);
+    });
+};
