@@ -29,6 +29,10 @@ app.post('/', (req, res) => {
   res.send('post reguest');
 });
 
+app.use('*', (_, res) => {
+  res.status(404).send({ message: 'Ресурс не найден. Проверьте URL и метод запроса' });
+});
+
 app.listen(PORT, () => {
   // Если всё работает, консоль покажет, какой порт приложение слушает
   console.log(`App listening on port ${PORT}`);
