@@ -36,10 +36,29 @@ module.exports.createUser = (req, res) => {
     .catch(() => res.status(ERROR_CODE).send({ message: 'Произошла ошибка' }));
 };
 
-module.exports.meUser = (req, res) => {
-  res.status(SUCCESS_CODE).send({ message: 'Me User' });
-};
-
-module.exports.avatarUser = (req, res) => {
-  res.status(SUCCESS_CODE).send({ message: 'Avatar User' });
+module.exports.updateUser = (req, res) => {
+  if (Object.keys(req.body).length === 0) {
+    res.status(ERROR_CODE).send({ message: 'Передан пустой запрос' });
+    return;
+  }
+  User.findByIdAndUpdate(
+    req.user._id,
+    req.body,
+    {
+      new: true,
+      runValidators: true,
+    },
+  )
+    .then((user) => res.send(user))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(ERROR_CODE).send(err);
+        return;
+      }
+      if (err.name === 'CastError') {
+        res.status(NOT_FOUND_CODE).send({ error: 'Пользователь с таким id не найден' });
+        return;
+      }
+      res.status(NOT_FOUND_CODE).send(err);
+    });
 };
