@@ -1,19 +1,19 @@
 const Card = require('../models/card');
 
-const SUCCSESS_CODE = 200;
+const SUCCESS_CODE = 200;
 // const ERROR_CODE = 400;
 // const NOT_FOUND_CODE = 404;
 const SERVER_CODE = 500;
 
 module.exports.getCards = (req, res) => {
-  Card.find({}).then((cards) => res.status(SUCCSESS_CODE).send({ cards }));
+  Card.find({}).then((cards) => res.status(SUCCESS_CODE).send({ cards }));
 };
 
 module.exports.createCard = (req, res) => {
   const { name, link } = req.body;
   const owner = req.user._id;
   Card.create({ name, link, owner })
-    .then(() => res.status(SUCCSESS_CODE).send({ message: 'Пользователь создан' }))
+    .then(() => res.status(SUCCESS_CODE).send({ message: 'Пользователь создан' }))
     .catch(() => res.status(SERVER_CODE).send({ message: 'Произошла ошибка' }));
 };
 
