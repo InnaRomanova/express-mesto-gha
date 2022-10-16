@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
 const cardsRoute = require('./routes/cardsRoute');
 const usersRoute = require('./routes/usersRoute');
 
@@ -7,7 +8,15 @@ const { PORT = 3000 } = process.env; // Слушаем 3000 порт
 
 const app = express();
 
-app.use(express.json());
+app.use((req, _, next) => {
+  req.user = {
+    _id: '634c3815c9c0b79fd45dd6dc',
+  };
+
+  next();
+});
+
+app.use(bodyParser.json());
 app.use('/', cardsRoute);
 app.use('/', usersRoute);
 
@@ -23,13 +32,4 @@ app.post('/', (req, res) => {
 app.listen(PORT, () => {
   // Если всё работает, консоль покажет, какой порт приложение слушает
   console.log(`App listening on port ${PORT}`);
-});
-
-app.use((req, res, next) => {
-  req.user = {
-    // вставьте сюда _id созданного в предыдущем пункте пользователя
-    _id: '634c3815c9c0b79fd45dd6dc',
-  };
-
-  next();
 });

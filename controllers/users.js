@@ -41,6 +41,7 @@ module.exports.updateUser = (req, res) => {
     res.status(ERROR_CODE).send({ message: 'Передан пустой запрос' });
     return;
   }
+  console.log(req.user._id);
   User.findByIdAndUpdate(
     req.user._id,
     req.body,
