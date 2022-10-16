@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 
+const URL_REGEXP = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/;
+
 const cardSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -11,6 +13,10 @@ const cardSchema = new mongoose.Schema({
     required: true,
     type: String,
     minlength: 10,
+    validate: {
+      validator: (v) => URL_REGEXP.test(v),
+      message: ({ value }) => `${value} - некоректный адрес URL`,
+    },
   },
   owner: {
     required: true,
