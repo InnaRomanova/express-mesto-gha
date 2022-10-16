@@ -2,7 +2,7 @@
 # Проект Mesto бэкенд
 
 ## Серверная часть проекта
-## Ссылка на репозиторий: 
+Ссылка: https://github.com/InnaRomanova/express-mesto-gha
 
 ## Используемые технологии
 * MongoDB
