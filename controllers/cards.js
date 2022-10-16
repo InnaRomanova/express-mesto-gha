@@ -26,7 +26,7 @@ module.exports.deleteCard = (req, res) => {
   Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
-        res.status(ERROR_CODE).send({ message: 'Пост с таким id не найден' });
+        res.status(NOT_FOUND_CODE).send({ message: 'Пост с таким id не найден' });
         return;
       }
       Card.findByIdAndRemove(req.params.cardId)
