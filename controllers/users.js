@@ -6,8 +6,8 @@ module.exports.getUsers = (req, res) => {
 
 module.exports.getUser = (req, res) => {
   User.findOne({ _id: req.params.id })
-.then((user) => res.send({ user }))
-.catch(() => res.send({ error: 'Пользователь с таким id не найден' }));
+    .then((user) => res.send({ user }))
+    .catch(() => res.send({ error: 'Пользователь с таким id не найден' }));
 };
 
 module.exports.createUser = (req, res) => {
