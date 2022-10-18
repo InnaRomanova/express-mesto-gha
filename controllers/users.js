@@ -6,7 +6,8 @@ const NOT_FOUND_CODE = 404;
 const SERVER_CODE = 500;
 
 module.exports.getUsers = (req, res) => {
-  User.find({}).then((users) => res.status(SUCCESS_CODE).send({ users }));
+  User.find({}).then((users) => res.send(users))
+    .catch(() => res.status(SERVER_CODE).send({ message: 'Ошибка на сервере' }));
 };
 
 module.exports.getUser = (req, res) => {
@@ -16,14 +17,14 @@ module.exports.getUser = (req, res) => {
         res.status(NOT_FOUND_CODE).send({ message: 'Пользователь с таким id не найден' });
         return;
       }
-      res.status(SUCCESS_CODE).send(user);
+      res.send(user);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
         res.status(ERROR_CODE).send(err);
         return;
       }
-      res.status(SERVER_CODE).send(err);
+      res.status(SERVER_CODE).send({ message: 'Ошибка на сервере' });
     });
 };
 
@@ -33,33 +34,44 @@ module.exports.createUser = (req, res) => {
   const { name, about, avatar } = req.body;
   User.create({ name, about, avatar })
     .then((user) => res.status(SUCCESS_CODE).send(user))
-    .catch(() => res.status(ERROR_CODE).send({ message: 'Произошла ошибка' }));
-};
-
-module.exports.updateUser = (req, res) => {
-  if (Object.keys(req.body).length === 0) {
-    res.status(ERROR_CODE).send({ message: 'Передан пустой запрос' });
-    return;
-  }
-  console.log(req.user._id);
-  User.findByIdAndUpdate(
-    req.user._id,
-    req.body,
-    {
-      new: true,
-      runValidators: true,
-    },
-  )
-    .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(ERROR_CODE).send(err);
+        res.status(ERROR_CODE).send({ message: 'Произошла ошибка валидации' });
         return;
       }
-      if (err.name === 'CastError') {
-        res.status(NOT_FOUND_CODE).send({ error: 'Пользователь с таким id не найден' });
-        return;
-      }
-      res.status(NOT_FOUND_CODE).send(err);
+      res.status(SERVER_CODE).send({ message: 'Ошибка на сервере' });
     });
+};
+
+const updateUser = (req, res, userData) => {
+  User.findByIdAndUpdate(req.user._id, userData, {
+    new: true,
+    runValidators: true,
+  })
+    .then((user) => {
+      if (!user) res.status(NOT_FOUND_CODE).send({ message: 'Пользователь с таким id не найден' });
+      res.send(user);
+    })
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(ERROR_CODE).send({ message: 'Данные некорректные. Ошибка валидации' });
+        return;
+      }
+      res.status(SERVER_CODE).send({ message: 'Ошибка на сервере' });
+    });
+};
+
+module.exports.updateUserInfo = (req, res) => {
+  const userData = {
+    name: req.body.name,
+    about: req.body.about,
+  };
+  updateUser(req, res, userData);
+};
+
+module.exports.updateUserAvatar = (req, res) => {
+  const userData = {
+    avatar: req.body.avatar,
+  };
+  updateUser(req, res, userData);
 };

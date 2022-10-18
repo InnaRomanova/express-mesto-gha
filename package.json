@@ -5,8 +5,8 @@
   "master": "app.js",
   "scripts": {
     "dev": "nodemon app.js",
-    "lint": "npx eslint",
-    "start": "nodemon app.js"
+    "lint": "npx eslint .",
+    "start": "node app.js"
   },
   "repository": {
     "type": "git",
