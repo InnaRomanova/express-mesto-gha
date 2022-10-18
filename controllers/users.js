@@ -1,9 +1,11 @@
 const User = require('../models/user');
 
-const SUCCESS_CODE = 200;
-const ERROR_CODE = 400;
-const NOT_FOUND_CODE = 404;
-const SERVER_CODE = 500;
+const {
+  SUCCESS_CODE,
+  ERROR_CODE,
+  NOT_FOUND_CODE,
+  SERVER_CODE,
+} = require('../utils/constants');
 
 module.exports.getUsers = (req, res) => {
   User.find({}).then((users) => res.send(users))
