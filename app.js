@@ -3,18 +3,18 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cardsRoute = require('./routes/cardsRoute');
 const usersRoute = require('./routes/usersRoute');
+const auth = require('./middlewares/auth');
+const { login, createUser } = require('./controllers/users');
 
 const { PORT = 3000 } = process.env; // Слушаем 3000 порт
 
 const app = express();
 
-app.use((req, _, next) => {
-  req.user = {
-    _id: '634c3815c9c0b79fd45dd6dc',
-  };
-
-  next();
-});
+// роуты, не требующие авторизации
+app.post('/signin', createUser);
+app.post('/signup', login);
+// авторизация
+app.use(auth);
 
 app.use(bodyParser.json());
 app.use('/', cardsRoute);

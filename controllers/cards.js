@@ -27,6 +27,10 @@ module.exports.deleteCard = (req, res) => {
         res.status(NOT_FOUND_CODE).send({ message: 'Пост с таким id не найден' });
         return;
       }
+      if (card.owner.toString() !== req.user._id) {
+        res.status(403).send({ message: 'Чужие карточки удалять нельзя' });
+        return;
+      }
       Card.findByIdAndRemove(req.params.cardId)
         .then(() => res.send({ message: 'Пост удалён' }))
         .catch(() => res.status(SERVER_CODE).send({ message: 'Ошибка на сервере' }));

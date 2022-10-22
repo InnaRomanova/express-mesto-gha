@@ -127,3 +127,10 @@ module.exports.updateUserAvatar = (req, res) => {
   };
   updateUser(req, res, userData);
 };
+
+module.exports.getProfile = (req, res) => {
+  User.findOne({ _id: req.user._id })
+    .then((user) => res.send(user))
+    .catch(() => res.status(UNAUTHORIZED_ERROR_CODE)
+      .send({ message: 'Ошибка авторизации или аутентификации' }));
+};
