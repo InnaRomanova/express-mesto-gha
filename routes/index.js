@@ -4,9 +4,10 @@ const usersRoute = require('./usersRoute');
 const auth = require('../middlewares/auth');
 const userController = require('../controllers/users');
 const NotFoundCode = require('../errors/notFoundCode');
+const { validateLoginData, validateRegisterData } = require('../utils/validators/userValidators');
 
-router.post('/signin', userController.login);
-router.post('/signup', userController.createUser);
+router.post('/signin', validateLoginData, userController.login);
+router.post('/signup', validateRegisterData, userController.createUser);
 
 router.use(auth);
 // защищенные роуты
