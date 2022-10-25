@@ -1,22 +1,19 @@
 const mongoose = require('mongoose');
-
-const {
-  URL_REGEXP,
-} = require('../utils/constants');
+const validator = require('validator');
 
 const cardSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    minlength: 2,
-    maxlength: 30,
+    minlength: [2, 'минимальная длина поля 2 символа'],
+    maxlength: [30, 'максимальная длина поля 30 символов'],
   },
   link: {
     required: true,
     type: String,
     validate: {
-      validator: (v) => URL_REGEXP.test(v),
-      message: ({ value }) => `${value} - некоректный адрес URL`,
+      validator: (v) => validator.isURL(v, { protocols: ['http', 'https'], require_protocol: true }),
+      message: ({ value }) => `${value} - некоректный адрес URL. Ожидается адрес в формате: http(s)://(www).site.com`,
     },
   },
   owner: {

@@ -1,64 +1,60 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+const ErrorCode = require('../errors/errorCode');
+const NotFoundCode = require('../errors/notFoundCode');
+const ConflictEmail = require('../errors/conflictEmail');
+const { JWT } = require('../utils/constants');
 
-const {
-  // SUCCESS_CODE,
-  ERROR_CODE,
-  UNAUTHORIZED_ERROR_CODE,
-  NOT_FOUND_CODE,
-  SERVER_CODE,
-} = require('../utils/constants');
-
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
-  User.findOne({ email, password })
+  return User.findUserByCredentials({ email, password })
     .then((user) => {
       // создаю токен
-      const token = jwt.sign({ _id: user._id }, 'JWT', { expiresIn: '7d' });
+      const token = jwt.sign({ _id: user._id }, JWT, { expiresIn: '7d' });
       // возвращаю токен
-      res.send({ token });
-      if (!user) {
-        // пользователь с такой почтой не найден
-        return Promise.reject(new Error('Неправильные почта или пароль'));
-      }
+      res
+        .cookie('token', token, {
+          // JWT токен, который отправляем
+          maxAge: 3600000,
+          httpOnly: true,
+          sameSite: true,
+        }).send({ email });
       // пользователь найден
-      return bcrypt.compare(password, user.password);
+      // return bcrypt.compare(password, user.password);
     })
-    .then((matched) => {
-      if (!matched) {
-        // хеши не совпали, отклоняем промис
-        return Promise.reject(new Error('Неправильные почта или пароль'));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new ErrorCode(err.message));
+      } else {
+        next(err);
       }
-      // аутентификация успешна
-      res.send({ message: 'Все верно!' });
-    })
-    .catch(() => {
-      // возвращаем ошибку аутентификации
-      res.status(UNAUTHORIZED_ERROR_CODE).send({ message: 'Ошибка авторизации или аутентификации' });
     });
 };
 
-module.exports.getUsers = (req, res) => {
-  User.find({}).then((users) => res.send(users))
-    .catch(() => res.status(SERVER_CODE).send({ message: 'Ошибка на сервере' }));
+module.exports.logout = (req, res) => {
+  res.clearCookie('token').send({ message: 'Вы вышли из профиля' });
 };
 
-module.exports.getUser = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
+  User.find({}).then((users) => res.send(users))
+    .catch(next);
+};
+
+module.exports.getUser = (req, res, next) => {
   User.findOne({ _id: req.params.id })
     .then((user) => {
       if (!user) {
-        res.status(NOT_FOUND_CODE).send({ message: 'Пользователь с таким id не найден' });
-        return;
+        throw new NotFoundCode('Пользователь с таким id не найден');
       }
       res.send(user);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(ERROR_CODE).send(err);
-        return;
+        next(new ErrorCode('Некорректный id формат пользователя'));
+      } else {
+        next(err);
       }
-      res.status(SERVER_CODE).send({ message: 'Ошибка на сервере' });
     });
 };
 
@@ -80,12 +76,12 @@ module.exports.createUser = async (req, res, next) => {
       email,
       password: hash,
     });
-    // res.status(201).send(newUser);
+    res.status(201).send(newUser);
   } catch (err) {
     if (err.code === 11000) {
-      next();
+      next(new ConflictEmail('Пользователь с таким email уже существует'));
     } else if (err.name === 'ValidationError') {
-      next((err.message));
+      next(new ErrorCode(err.message));
       // res.status(ERROR_CODE).send({ message: 'Произошла ошибка валидации' });
       // return;
     } else {
@@ -95,21 +91,19 @@ module.exports.createUser = async (req, res, next) => {
   }
 };
 
-const updateUser = (req, res, userData) => {
+const updateUser = (req, res, userData, next) => {
   User.findByIdAndUpdate(req.user._id, userData, {
     new: true,
     runValidators: true,
   })
     .then((user) => {
-      if (!user) res.status(NOT_FOUND_CODE).send({ message: 'Пользователь с таким id не найден' });
+    // if (!user) res.status(NOT_FOUND_CODE).send({ message: 'Пользователь с таким id не найден' });
       res.send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(ERROR_CODE).send({ message: 'Данные некорректные. Ошибка валидации' });
-        return;
+        next(new ErrorCode('Данные некорректные. Ошибка валидации'));
       }
-      res.status(SERVER_CODE).send({ message: 'Ошибка на сервере' });
     });
 };
 
@@ -121,16 +115,12 @@ module.exports.updateUserInfo = (req, res) => {
   updateUser(req, res, userData);
 };
 
-module.exports.updateUserAvatar = (req, res) => {
-  const userData = {
-    avatar: req.body.avatar,
-  };
-  updateUser(req, res, userData);
+module.exports.updateUserAvatar = (req, res, next) => {
+  updateUser(req, res, next, { avatar: req.body.avatar });
 };
 
-module.exports.getProfile = (req, res) => {
+module.exports.getProfile = (req, res, next) => {
   User.findOne({ _id: req.user._id })
     .then((user) => res.send(user))
-    .catch(() => res.status(UNAUTHORIZED_ERROR_CODE)
-      .send({ message: 'Ошибка авторизации или аутентификации' }));
+    .catch(next);
 };

@@ -1,55 +1,61 @@
 const Card = require('../models/card');
+const ErrorCode = require('../errors/errorCode');
+const NotFoundCode = require('../errors/notFoundCode');
+const ServerCode = require('../errors/serverCode');
+const ForbiddenError = require('../errors/forbiddenError');
 
-const { ERROR_CODE, NOT_FOUND_CODE, SERVER_CODE } = require('../utils/constants');
-
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({}).then((cards) => res.send({ cards }))
-    .catch((err) => res.status(SERVER_CODE).send(err));
+    .catch(next(new ServerCode('Ошибка сервера')));
 };
 
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user._id })
     .then((card) => res.send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(ERROR_CODE).send({ message: 'Ошибка валидации' });
-        return;
+        next(new ErrorCode('Ошибка валидации'));
+      } else {
+        next(new ServerCode('Ошибка на сервере'));
       }
-      res.status(SERVER_CODE).send({ message: 'Ошибка на сервере' });
     });
 };
 
-module.exports.deleteCard = (req, res) => {
+module.exports.deleteCard = (req, res, next) => {
   Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
-        res.status(NOT_FOUND_CODE).send({ message: 'Пост с таким id не найден' });
-        return;
+        throw new NotFoundCode('Пост с таким id не найден');
+        // res.status(NOT_FOUND_CODE).send({ message: 'Пост с таким id не найден' });
+        // return;
       }
       if (card.owner.toString() !== req.user._id) {
-        res.status(403).send({ message: 'Чужие карточки удалять нельзя' });
-        return;
+        throw new ForbiddenError('Чужие карточки удалять нельзя');
+        // res.status(403).send({ message: 'Чужие карточки удалять нельзя' });
+        // return;
       }
       Card.findByIdAndRemove(req.params.cardId)
         .then(() => res.send({ message: 'Пост удалён' }))
-        .catch(() => res.status(SERVER_CODE).send({ message: 'Ошибка на сервере' }));
+        .catch(next(new ServerCode('Ошибка на сервере')));
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(ERROR_CODE).send({ message: 'Некорректный _id карточки' });
-        return;
+        next(new ErrorCode('Некорректный _id карточки'));
+      } else {
+        next(new ServerCode('Ошибка на сервере'));
       }
-      res.status(SERVER_CODE).send({ message: 'Ошибка на сервере' });
+      // res.status(SERVER_CODE).send({ message: 'Ошибка на сервере' });
     });
 };
 
-module.exports.likeCard = (req, res) => {
+module.exports.likeCard = (req, res, next) => {
   Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
-        res.status(NOT_FOUND_CODE).send({ message: 'Пост с таким id не найден' });
-        return;
+        throw new NotFoundCode('Пост с таким id не найден');
+        // res.status(NOT_FOUND_CODE).send({ message: 'Пост с таким id не найден' });
+        // return;
       }
       Card.findByIdAndUpdate(
         req.params.cardId,
@@ -57,23 +63,27 @@ module.exports.likeCard = (req, res) => {
         { new: true },
       )
         .then((newCard) => res.send(newCard))
-        .catch(() => res.status(SERVER_CODE).send({ message: 'Ошибка на сервере' }));
+        .catch(next(new ServerCode('Ошибка на сервере')));
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(ERROR_CODE).send({ message: 'Некорректный _id карточки' });
-        return;
+        next(new ErrorCode('Некорректный id карточки'));
+        // res.status(ERROR_CODE).send({ message: 'Некорректный _id карточки' });
+        // return;
+      } else {
+        next(new ServerCode('Ошибка на сервере'));
       }
-      res.status(SERVER_CODE).send({ message: 'Ошибка на сервере' });
+      // res.status(SERVER_CODE).send({ message: 'Ошибка на сервере' });
     });
 };
 
-module.exports.dislikeCard = (req, res) => {
+module.exports.dislikeCard = (req, res, next) => {
   Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
-        res.status(NOT_FOUND_CODE).send({ message: 'Пост с таким id не найден' });
-        return;
+        throw new NotFoundCode('Пост с таким id не найден');
+        // res.status(NOT_FOUND_CODE).send({ message: 'Пост с таким id не найден' });
+        // return;
       }
       Card.findByIdAndUpdate(
         req.params.cardId,
@@ -81,13 +91,17 @@ module.exports.dislikeCard = (req, res) => {
         { new: true },
       )
         .then((newCard) => res.send(newCard))
-        .catch(() => res.status(SERVER_CODE).send({ message: 'Ошибка на сервере' }));
+        .catch(next(new ServerCode('Ошибка на сервере')));
+      // .catch(() => res.status(SERVER_CODE).send({ message: 'Ошибка на сервере' }));
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(ERROR_CODE).send({ message: 'Некорректный _id карточки' });
-        return;
+        next(new ErrorCode('Некорректный id карточки'));
+        // res.status(ERROR_CODE).send({ message: 'Некорректный _id карточки' });
+        // return;
+      } else {
+        next(new ServerCode('Ошибка на сервере'));
       }
-      res.status(SERVER_CODE).send({ message: 'Ошибка на сервере' });
+      // res.status(SERVER_CODE).send({ message: 'Ошибка на сервере' });
     });
 };
