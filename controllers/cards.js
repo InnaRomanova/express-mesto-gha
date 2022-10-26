@@ -6,7 +6,7 @@ const ForbiddenError = require('../errors/forbiddenError');
 
 module.exports.getCards = (req, res, next) => {
   Card.find({}).then((cards) => res.send({ cards }))
-    .catch(next(new ServerCode('Ошибка сервера')));
+    .catch(next);
 };
 
 module.exports.createCard = (req, res, next) => {
@@ -30,6 +30,7 @@ module.exports.deleteCard = (req, res, next) => {
         // res.status(NOT_FOUND_CODE).send({ message: 'Пост с таким id не найден' });
         // return;
       }
+
       if (card.owner.toString() !== req.user._id) {
         throw new ForbiddenError('Чужие карточки удалять нельзя');
         // res.status(403).send({ message: 'Чужие карточки удалять нельзя' });
@@ -43,7 +44,7 @@ module.exports.deleteCard = (req, res, next) => {
       if (err.name === 'CastError') {
         next(new ErrorCode('Некорректный _id карточки'));
       } else {
-        next(new ServerCode('Ошибка на сервере'));
+        next(err);
       }
       // res.status(SERVER_CODE).send({ message: 'Ошибка на сервере' });
     });

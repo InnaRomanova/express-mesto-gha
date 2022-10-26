@@ -1,20 +1,24 @@
 const jwt = require('jsonwebtoken');
-const JWT = require('../utils/constants');
+const { JWT } = require('../utils/constants');
 const UnauthorixedErrorCode = require('../errors/unauthorixedErrorCode');
 
-module.exports = (req, res, next) => {
+module.exports = (req, _, next) => {
   const { token } = req.cookies;
   // убеждаюсь, что он есть или начинается с Bearer
   if (!token) {
-    throw new UnauthorixedErrorCode('Необходима авторизация');
+    throw new UnauthorixedErrorCode('Необходима авторизация 1');
   }
+
+  console.log(token);
+  console.log(JWT);
+  console.log(jwt.verify(token, JWT));
 
   let payload;
   // верифицирую токен
   try {
     payload = jwt.verify(token, JWT);
   } catch (err) {
-    next(new UnauthorixedErrorCode('Необходима авторизация'));
+    next(new UnauthorixedErrorCode('Необходима авторизация 2'));
     // отправляю ошибку, если не получилось
   }
   // записываю пейлоуд в объект запроса

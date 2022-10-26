@@ -35,12 +35,11 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
-    minlength: [8, 'минимальная длина пароля 8 символов'],
     select: false,
   },
-});
+}, { toObject: { useProjection: true }, toJSON: { useProjection: true } });
 
-userSchema.statics.findUserByCredentials = function (email, password) {
+userSchema.statics.findUser = function (email, password) {
   return this.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {

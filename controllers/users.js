@@ -8,7 +8,7 @@ const { JWT } = require('../utils/constants');
 
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
-  return User.findUserByCredentials({ email, password })
+  return User.findUser(email, password)
     .then((user) => {
       // создаю токен
       const token = jwt.sign({ _id: user._id }, JWT, { expiresIn: '7d' });
@@ -16,7 +16,7 @@ module.exports.login = (req, res, next) => {
       res
         .cookie('token', token, {
           // JWT токен, который отправляем
-          maxAge: 3600000,
+          maxAge: 3600 * 24 * 7,
           httpOnly: true,
           sameSite: true,
         }).send({ email });
@@ -120,6 +120,7 @@ module.exports.updateUserAvatar = (req, res, next) => {
 };
 
 module.exports.getProfile = (req, res, next) => {
+  console.log(req.user);
   User.findOne({ _id: req.user._id })
     .then((user) => res.send(user))
     .catch(next);
