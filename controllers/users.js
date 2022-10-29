@@ -81,7 +81,7 @@ module.exports.createUser = async (req, res, next) => {
     if (err.code === 11000) {
       next(new ConflictEmail('Пользователь с таким email уже существует'));
     } else if (err.name === 'ValidationError') {
-      next(new ErrorCode(err.message));
+      next(new ErrorCode('Ошибка валидации'));
       // res.status(ERROR_CODE).send({ message: 'Произошла ошибка валидации' });
       // return;
     } else {
