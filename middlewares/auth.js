@@ -6,23 +6,19 @@ module.exports = (req, _, next) => {
   const { token } = req.cookies;
   // убеждаюсь, что он есть или начинается с Bearer
   if (!token) {
-    throw new UnauthorixedErrorCode('Необходима авторизация 1');
+    throw new UnauthorixedErrorCode('Необходима авторизация');
   }
-
-  console.log(token);
-  console.log(JWT);
-  console.log(jwt.verify(token, JWT));
 
   let payload;
   // верифицирую токен
   try {
     payload = jwt.verify(token, JWT);
   } catch (err) {
-    next(new UnauthorixedErrorCode('Необходима авторизация 2'));
+    next(new UnauthorixedErrorCode('Необходима авторизация'));
     // отправляю ошибку, если не получилось
   }
   // записываю пейлоуд в объект запроса
   req.user = payload;
   // пропускаю запрос дальше
-  return next();
+  next();
 };
