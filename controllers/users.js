@@ -110,12 +110,12 @@ const updateUser = (req, res, next, userData) => {
     });
 };
 
-module.exports.updateUserInfo = (req, res) => {
+module.exports.updateUserInfo = (req, res, next) => {
   const userData = {
     name: req.body.name,
     about: req.body.about,
   };
-  updateUser(req, res, userData);
+  updateUser(req, res, next, userData);
 };
 
 module.exports.updateUserAvatar = (req, res, next) => {
