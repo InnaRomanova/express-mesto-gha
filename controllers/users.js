@@ -20,8 +20,6 @@ module.exports.login = (req, res, next) => {
           httpOnly: true,
           sameSite: true,
         }).send({ email });
-      // пользователь найден
-      // return bcrypt.compare(password, user.password);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -59,7 +57,6 @@ module.exports.getUser = (req, res, next) => {
 };
 
 module.exports.createUser = async (req, res, next) => {
-  // if (!req.body) return res.sendStatus(ERROR_CODE).send({ message: 'Введите данные' });
   const {
     name,
     about,
@@ -82,12 +79,9 @@ module.exports.createUser = async (req, res, next) => {
       next(new ConflictEmail('Пользователь с таким email уже существует'));
     } else if (err.name === 'ValidationError') {
       next(new ErrorCode('Ошибка валидации'));
-      // res.status(ERROR_CODE).send({ message: 'Произошла ошибка валидации' });
-      // return;
     } else {
       next(err);
     }
-    // res.status(SERVER_CODE).send({ message: 'Ошибка на сервере' });
   }
 };
 

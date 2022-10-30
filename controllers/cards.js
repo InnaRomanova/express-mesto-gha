@@ -27,18 +27,13 @@ module.exports.deleteCard = (req, res, next) => {
     .then((card) => {
       if (!card) {
         throw new NotFoundCode('Пост с таким id не найден');
-        // res.status(NOT_FOUND_CODE).send({ message: 'Пост с таким id не найден' });
-        // return;
       }
 
       if (card.owner.toString() !== req.user._id) {
         throw new ForbiddenError('Чужие карточки удалять нельзя');
-        // res.status(403).send({ message: 'Чужие карточки удалять нельзя' });
-        // return;
       }
       Card.findByIdAndRemove(req.params.cardId)
         .then(() => res.send({ message: 'Пост удалён' }));
-      // .catch(next(new ServerCode('Ошибка на сервере')));
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -46,7 +41,6 @@ module.exports.deleteCard = (req, res, next) => {
       } else {
         next(err);
       }
-      // res.status(SERVER_CODE).send({ message: 'Ошибка на сервере' });
     });
 };
 
@@ -55,8 +49,6 @@ module.exports.likeCard = (req, res, next) => {
     .then((card) => {
       if (!card) {
         throw new NotFoundCode('Карточка не найдена');
-        // res.status(NOT_FOUND_CODE).send({ message: 'Пост с таким id не найден' });
-        // return;
       }
       Card.findByIdAndUpdate(
         req.params.cardId,
@@ -64,17 +56,13 @@ module.exports.likeCard = (req, res, next) => {
         { new: true },
       )
         .then((newCard) => res.send(newCard));
-      // .catch(next(new ServerCode('Ошибка на сервере')));
     })
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new ErrorCode('Некорректный id карточки'));
-        // res.status(ERROR_CODE).send({ message: 'Некорректный _id карточки' });
-        // return;
       } else {
         next(err);
       }
-      // res.status(SERVER_CODE).send({ message: 'Ошибка на сервере' });
     });
 };
 
@@ -83,8 +71,6 @@ module.exports.dislikeCard = (req, res, next) => {
     .then((card) => {
       if (!card) {
         throw new NotFoundCode('Пост с таким id не найден');
-        // res.status(NOT_FOUND_CODE).send({ message: 'Пост с таким id не найден' });
-        // return;
       }
       Card.findByIdAndUpdate(
         req.params.cardId,
@@ -92,17 +78,12 @@ module.exports.dislikeCard = (req, res, next) => {
         { new: true },
       )
         .then((newCard) => res.send(newCard));
-      // .catch(next(new ServerCode('Ошибка на сервере')));
-      // .catch(() => res.status(SERVER_CODE).send({ message: 'Ошибка на сервере' }));
     })
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new ErrorCode('Некорректный id карточки'));
-        // res.status(ERROR_CODE).send({ message: 'Некорректный _id карточки' });
-        // return;
       } else {
         next(err);
       }
-      // res.status(SERVER_CODE).send({ message: 'Ошибка на сервере' });
     });
 };
