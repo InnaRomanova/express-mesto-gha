@@ -46,11 +46,6 @@ module.exports.deleteCard = (req, res, next) => {
 };
 
 module.exports.likeCard = (req, res, next) => {
-  // Card.findById(req.params.cardId)
-  //   .then((card) => {
-  // if (!card) {
-  //   throw new NotFoundCode('Карточка не найдена');
-  // }
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
@@ -73,11 +68,6 @@ module.exports.likeCard = (req, res, next) => {
 };
 
 module.exports.dislikeCard = (req, res, next) => {
-  // Card.findById(req.params.cardId)
-  //   .then((card) => {
-  //     if (!card) {
-  //       throw new NotFoundCode('Пост с таким id не найден');
-  //     }
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
