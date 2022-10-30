@@ -91,13 +91,12 @@ module.exports.createUser = async (req, res, next) => {
   }
 };
 
-const updateUser = (req, res, userData, next) => {
+const updateUser = (req, res, next, userData) => {
   User.findByIdAndUpdate(req.user._id, userData, {
     new: true,
     runValidators: true,
   })
     .then((user) => {
-    // if (!user) res.status(NOT_FOUND_CODE).send({ message: 'Пользователь с таким id не найден' });
       res.send(user);
     })
     .catch((err) => {
@@ -120,11 +119,13 @@ module.exports.updateUserInfo = (req, res) => {
 };
 
 module.exports.updateUserAvatar = (req, res, next) => {
-  updateUser(req, res, next, { avatar: req.body.avatar });
+  const userData = {
+    avatar: req.body.avatar,
+  };
+  updateUser(req, res, next, userData);
 };
 
 module.exports.getProfile = (req, res, next) => {
-  console.log(req.user);
   User.findOne({ _id: req.user._id })
     .then((user) => res.send(user))
     .catch(next);
