@@ -13,11 +13,11 @@ module.exports = (req, _, next) => {
   try {
     payload = jwt.verify(token, JWT);
   } catch (err) {
-    next(new UnauthorixedErrorCode('Необходима авторизация'));
+    return next(new UnauthorixedErrorCode('Необходима авторизация'));
     // отправляю ошибку, если не получилось
   }
   // записываю пейлоуд в объект запроса
   req.user = payload;
   // пропускаю запрос дальше
-  next();
+  return next();
 };

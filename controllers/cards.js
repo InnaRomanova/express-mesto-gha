@@ -33,7 +33,8 @@ module.exports.deleteCard = (req, res, next) => {
         throw new ForbiddenError('Чужие карточки удалять нельзя');
       }
       Card.findByIdAndRemove(req.params.cardId)
-        .then(() => res.send({ message: 'Пост удалён' }));
+        .then(() => res.send({ message: 'Пост удалён' }))
+        .catch(next());
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -45,17 +46,22 @@ module.exports.deleteCard = (req, res, next) => {
 };
 
 module.exports.likeCard = (req, res, next) => {
-  Card.findById(req.params.cardId)
+  // Card.findById(req.params.cardId)
+  //   .then((card) => {
+  // if (!card) {
+  //   throw new NotFoundCode('Карточка не найдена');
+  // }
+  Card.findByIdAndUpdate(
+    req.params.cardId,
+    { $addToSet: { likes: req.user._id } },
+    { new: true },
+  )
+    .orFail(() => new NotFoundCode('Указанный id не найден'))
     .then((card) => {
       if (!card) {
-        throw new NotFoundCode('Карточка не найдена');
+        return next(new NotFoundCode('Пост с таким id не найден'));
       }
-      Card.findByIdAndUpdate(
-        req.params.cardId,
-        { $addToSet: { likes: req.user._id } },
-        { new: true },
-      )
-        .then((newCard) => res.send(newCard));
+      return res.send({ card, message: 'Лайк поставлен' });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -67,17 +73,22 @@ module.exports.likeCard = (req, res, next) => {
 };
 
 module.exports.dislikeCard = (req, res, next) => {
-  Card.findById(req.params.cardId)
+  // Card.findById(req.params.cardId)
+  //   .then((card) => {
+  //     if (!card) {
+  //       throw new NotFoundCode('Пост с таким id не найден');
+  //     }
+  Card.findByIdAndUpdate(
+    req.params.cardId,
+    { $pull: { likes: req.user._id } },
+    { new: true },
+  )
+    .orFail(() => new NotFoundCode('Указанный id не найден'))
     .then((card) => {
       if (!card) {
-        throw new NotFoundCode('Пост с таким id не найден');
+        return next(new NotFoundCode('Карточка с указанным id не найдена'));
       }
-      Card.findByIdAndUpdate(
-        req.params.cardId,
-        { $pull: { likes: req.user._id } },
-        { new: true },
-      )
-        .then((newCard) => res.send(newCard));
+      return res.send({ card, message: 'Лайк удален' });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
