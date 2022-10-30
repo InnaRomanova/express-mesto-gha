@@ -102,7 +102,11 @@ const updateUser = (req, res, userData, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new ErrorCode('Данные некорректные. Ошибка валидации'));
+        next(new ErrorCode('Отправленные данные некорректный, перепроверьте данные.'));
+      } else if (err.name === 'CastError') {
+        next(new ErrorCode('Не корректный _id пользователя'));
+      } else {
+        next(err);
       }
     });
 };
