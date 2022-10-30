@@ -4,7 +4,6 @@ const UnauthorixedErrorCode = require('../errors/unauthorixedErrorCode');
 
 module.exports = (req, _, next) => {
   const { token } = req.cookies;
-  // убеждаюсь, что он есть или начинается с Bearer
   if (!token) {
     throw new UnauthorixedErrorCode('Необходима авторизация');
   }
