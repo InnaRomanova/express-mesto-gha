@@ -37,8 +37,8 @@ module.exports.deleteCard = (req, res, next) => {
         // return;
       }
       Card.findByIdAndRemove(req.params.cardId)
-        .then(() => res.send({ message: 'Пост удалён' }))
-        .catch(next(new ServerCode('Ошибка на сервере')));
+        .then(() => res.send({ message: 'Пост удалён' }));
+      // .catch(next(new ServerCode('Ошибка на сервере')));
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -54,7 +54,7 @@ module.exports.likeCard = (req, res, next) => {
   Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
-        throw new NotFoundCode('Пост с таким id не найден');
+        throw new NotFoundCode('Карточка не найдена');
         // res.status(NOT_FOUND_CODE).send({ message: 'Пост с таким id не найден' });
         // return;
       }
@@ -63,8 +63,8 @@ module.exports.likeCard = (req, res, next) => {
         { $addToSet: { likes: req.user._id } },
         { new: true },
       )
-        .then((newCard) => res.send(newCard))
-        .catch(next(new ServerCode('Ошибка на сервере')));
+        .then((newCard) => res.send(newCard));
+      // .catch(next(new ServerCode('Ошибка на сервере')));
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -72,7 +72,7 @@ module.exports.likeCard = (req, res, next) => {
         // res.status(ERROR_CODE).send({ message: 'Некорректный _id карточки' });
         // return;
       } else {
-        next(new ServerCode('Ошибка на сервере'));
+        next(err);
       }
       // res.status(SERVER_CODE).send({ message: 'Ошибка на сервере' });
     });
@@ -91,8 +91,8 @@ module.exports.dislikeCard = (req, res, next) => {
         { $pull: { likes: req.user._id } },
         { new: true },
       )
-        .then((newCard) => res.send(newCard))
-        .catch(next(new ServerCode('Ошибка на сервере')));
+        .then((newCard) => res.send(newCard));
+      // .catch(next(new ServerCode('Ошибка на сервере')));
       // .catch(() => res.status(SERVER_CODE).send({ message: 'Ошибка на сервере' }));
     })
     .catch((err) => {
@@ -101,7 +101,7 @@ module.exports.dislikeCard = (req, res, next) => {
         // res.status(ERROR_CODE).send({ message: 'Некорректный _id карточки' });
         // return;
       } else {
-        next(new ServerCode('Ошибка на сервере'));
+        next(err);
       }
       // res.status(SERVER_CODE).send({ message: 'Ошибка на сервере' });
     });

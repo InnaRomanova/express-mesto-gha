@@ -4,7 +4,7 @@ const { validateLoginData, validateRegisterData } = require('../utils/validators
 const cardsRoute = require('./cardsRoute');
 const usersRoute = require('./usersRoute');
 const auth = require('../middlewares/auth');
-const UnauthorixedErrorCode = require('../errors/unauthorixedErrorCode');
+const NotFoundCode = require('../errors/notFoundCode');
 
 router.post('/signin', validateLoginData, userController.login);
 router.post('/signup', validateRegisterData, userController.createUser);
@@ -15,7 +15,7 @@ router.use('/users', usersRoute);
 router.use('/cards', cardsRoute);
 router.get('/signout', userController.logout);
 router.use(() => {
-  throw new UnauthorixedErrorCode('Ресурс не найдет. Проверьте адрес');
+  throw new NotFoundCode('Ресурс не найдет. Проверьте адрес');
 });
 
 module.exports = router;
